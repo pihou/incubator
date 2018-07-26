@@ -1,0 +1,65 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: api
+  namespace: test
+spec:
+  selector:
+    app: api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: api}
+  template:
+    metadata:
+      labels: {app: api}
+      annotations: {version/config: 20180423-01}
+    spec:
+      imagePullSecrets:
+        - name: registry-key
+      containers:
+      - image: harbor.longban.site/longban/api:12db4c61
+        imagePullPolicy: Always
+        name: api
+        env:
+        - {name: "REDIS_URL", value: "redis://redis.test:6379"}
+        - {name: "DATABASE_URI", value: "mysql://longban:longban@mysql.test:3306/longban"}
+        - {name: "MINIO_HOST", value: "minio-service.test.svc.cluster.local:9000"}
+        - {name: "LOGSTASH_HOST", value: "logstash.kube-system.svc.cluster.local"}
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: username
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: password
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: config
+            items:
+            - key: init
+              path: __init__.py
+            - key: version
+              path: version.py

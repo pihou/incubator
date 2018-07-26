@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordered-consumer
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: ordered-consumer}
+  template:
+    metadata:
+      labels: {app: ordered-consumer}
+    spec:
+      imagePullSecrets:
+        - name: registry-key
+      containers:
+      - image: harbor.longban.site/longban/api:5a5f8ece
+        imagePullPolicy: Always
+        name: ordered-consumer
+        env:
+        - {name: "REDIS_URL", value: "redis://redis.test:6379"}
+        - {name: "DATABASE_URI", value: "mysql://longban:longban@mysql.test:3306/longban"}
+        - {name: "MINIO_HOST", value: "minio-service.test.svc.cluster.local:9000"}
+        - {name: "LOGSTASH_HOST", value: "logstash.kube-system.svc.cluster.local"}
+        - {name: "KAFKA_HOST", value: "kafka-1.kafka-svc.test.svc.cluster.local:9093"}
+        command: ["supervisord", "-n", "-c", "/app/docker/supervisord_ordered_consumer.conf"]

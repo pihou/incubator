@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test
+  namespace: test
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: 128m
+spec:
+  rules:
+  - host: swagger.longban.site
+    http:
+      paths:
+      - backend:
+          serviceName: api
+          servicePort: 80
+  - host: api.longban.site
+    http:
+      paths:
+      - backend:
+          serviceName: api
+          servicePort: 80
+  - host: admin.longban.site
+    http:
+      paths:
+      - backend:
+          serviceName: admin
+          servicePort: 80
+  tls:
+  - hosts:
+    - swagger.longban.site
+    secretName: swagger
+  - hosts:
+    - api.longban.site
+    secretName: api
+  - hosts:
+    - admin.longban.site
+    secretName: admin

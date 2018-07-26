@@ -1,0 +1,76 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql
+  namespace: test
+spec:
+  selector:
+    k8s-app: mysql
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: mysql
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-test
+  labels: {pv: mysql-test}
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: slow
+  nfs:
+    path: /mysql
+    server: 240a549044-omq59.cn-shenzhen.nas.aliyuncs.com
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: test
+  labels:
+    k8s-app: mysql
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: mysql
+  template:
+    metadata:
+      labels:
+        k8s-app: mysql
+    spec:
+      containers:
+      - image: daocloud.io/library/mysql:5.7.4
+        name: mysql
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-test
+          mountPath: /var/lib/mysql
+        env:
+        - {name: "MYSQL_ROOT_PASSWORD", value: "longban"}
+        - {name: "MYSQL_DATABASE", value: "longban"}
+        - {name: "MYSQL_USER", value: "longban"}
+        - {name: "MYSQL_PASSWORD", value: "longban"}
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-test
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: slow
+      selector:
+        matchLabels: {pv: "mysql-test"}
+

@@ -1,0 +1,45 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mqtt
+  namespace: test
+spec:
+  type: NodePort
+  selector:
+    app: mqtt
+  ports:
+  - protocol: TCP
+    port: 1883
+    targetPort: mqtt
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: mqtt}
+  template:
+    metadata:
+      labels: {app: mqtt}
+    spec:
+      imagePullSecrets:
+        - name: registry-key
+      containers:
+      - image: harbor.longban.site/longban/mqtt:d2a9847d
+        imagePullPolicy: Always
+        name: mqtt
+        env:
+        - {name: "REDIS_URL", value: "redis://redis.test:6379"}
+        - {name: "LOGSTASH_HOST", value: "logstash.kube-system.svc.cluster.local"}
+        - {name: "KAFKA_HOST", value: "kafka-1.kafka-svc.test.svc.cluster.local:9093"}
+        - {name: "DEBUG", value: "False"}
+        ports:
+        - containerPort: 1883
+          name: mqtt
+          protocol: TCP
+

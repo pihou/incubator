@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zentao
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: zentao}
+  template:
+    metadata:
+      labels: {app: zentao}
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: 192.168.0.118
+      volumes:
+      - name: zentao-data
+        hostPath:
+          path: "/data/docker/zentao"
+          type: Directory
+      containers:
+      - image: idoop/zentao:latest
+        name: zentao
+        volumeMounts:
+        - name: zentao-data
+          mountPath: /opt/zbox/
+        ports:
+        - name: web
+          containerPort: 80
+        env:
+        - {name: "USER", value: "admin"}
+        - {name: "PASSWD", value: "Xin1101"}
+        - {name: "BIND_ADDRESS", value: "false"}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zentao
+spec:
+  selector:
+    app: zentao
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: web
+

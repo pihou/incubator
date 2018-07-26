@@ -1,0 +1,38 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: admin
+  namespace: test
+spec:
+  selector:
+    app: admin
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: admin}
+  template:
+    metadata:
+      labels: {app: admin}
+      annotations: {version/config: 20180423-01}
+    spec:
+      imagePullSecrets:
+        - name: registry-key
+      containers:
+      - image: harbor.longban.site/longban/admin:2018.4.23-rc1
+        imagePullPolicy: Always
+        name: admin
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP

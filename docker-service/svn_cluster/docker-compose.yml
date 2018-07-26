@@ -1,0 +1,18 @@
+version: '2'
+services:
+  apache:
+    image: orchidflower/svnbox
+    volumes:
+      # let container use same timezone as host
+      - /etc/localtime:/etc/localtime
+      - /data/docker/svnbox/runtime/svnrep:/opt/scmroot/svnrep
+      - /data/docker/svnbox/runtime/svndigest:/opt/scmroot/svndigest
+      - /data/docker/svnbox/runtime/svn_deb_conf.inc:/etc/websvn/svn_deb_conf.inc
+      - /data/docker/svnbox/runtime/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+      - /data/docker/svnbox/runtime/index.html:/var/www/index.html
+    environment:
+      NODE_ENV: prd
+      restart: always
+      hostname: apache
+    ports:
+      - 85:80

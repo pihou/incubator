@@ -1,0 +1,24 @@
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  creationTimestamp: 2016-02-18T19:14:38Z
+  name: config
+  namespace: test
+data:
+  version: |
+    VERSION_INFO = {
+        "app": {
+            "android": (
+                {"version":2018004, "url": "http://longban-app.oss-cn-shenzhen.aliyuncs.com/mobile/mobile-0.0.4.apk"},
+            ),
+            "ios": (
+                {"version":2018001, "url": "http://longban-app.oss-cn-shenzhen.aliyuncs.com/mobile/mobile-0.0.1.apk"},
+            ),
+        },
+        "dev": (
+            {"version":2018007, "url":"http://longban-app.oss-cn-shenzhen.aliyuncs.com/device/device-0.0.7.apk"},
+        ),
+    }
+  init: |
+

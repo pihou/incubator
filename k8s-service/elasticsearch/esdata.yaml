@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: esdata0
+  labels: {pv: esdata}
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /esdata/data0
+    server: 2f59a48f6f-khi98.cn-shenzhen.nas.aliyuncs.com
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: esdata1
+  labels: {pv: esdata}
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /esdata/data1
+    server: 2f59a48f6f-khi98.cn-shenzhen.nas.aliyuncs.com

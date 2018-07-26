@@ -1,0 +1,32 @@
+version: '2'
+services:
+  drone-server:
+    image: drone/drone:0.8.4
+    ports:
+      - 8000:8000
+      - 9000
+    volumes:
+      - /data/docker/drone:/var/lib/drone/
+    restart: always
+    environment:
+      - DRONE_OPEN=false
+      - DRONE_ADMIN=bufan
+      - DRONE_HOST=https://drone.longban.site
+      - DRONE_GITLAB=true
+      - DRONE_GITLAB_CLIENT=
+      - DRONE_GITLAB_SECRET=
+      - DRONE_GITLAB_URL=https://gitlab.longban.site
+      - DRONE_SECRET=
+
+  drone-agent:
+    image: drone/agent:0.8.4
+    command: agent
+    restart: always
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_SERVER=drone-server:9000
+      - DRONE_SECRET=
+

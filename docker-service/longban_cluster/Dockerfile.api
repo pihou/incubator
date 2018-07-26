@@ -1,0 +1,14 @@
+FROM openresty/openresty:1.13.6.1-centos
+
+MAINTAINER monkey <bufan@szxintom.com>
+
+RUN yum groupinstall "Development tools" -y 
+RUN yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel tcl tcl-devel tk tk-devel -y
+
+ADD ./Python-2.7.14.tgz /opt
+RUN cd /opt/Python-2.7.14 && ./configure && make && make install
+#RUN yum install -y epel-release python-pip 
+RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python get-pip.py
+RUN yum install -y python-devel mysql-devel
+RUN pip install --index-url https://mirrors.aliyun.com/pypi/simple uWSGI==2.0.14 Django==1.10.4 supervisor
+

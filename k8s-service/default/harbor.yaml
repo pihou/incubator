@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-mysql
+  labels: {pv: harbor-mysql}
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /harbor/mysql
+    server: 2f59a48f6f-khi98.cn-shenzhen.nas.aliyuncs.com
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: harbor-registry
+  labels: {pv: harbor-registry}
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /harbor/registry
+    server: 2f59a48f6f-khi98.cn-shenzhen.nas.aliyuncs.com

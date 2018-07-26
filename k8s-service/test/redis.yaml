@@ -1,0 +1,71 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  namespace: test
+spec:
+  selector:
+    k8s-app: redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: redis
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-test
+  labels: {pv: redis-test}
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: slow
+  nfs:
+    path: /redis
+    server: 240a549044-omq59.cn-shenzhen.nas.aliyuncs.com
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: test
+  labels:
+    k8s-app: redis
+spec:
+  serviceName: redis
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: redis
+  template:
+    metadata:
+      labels:
+        k8s-app: redis
+    spec:
+      containers:
+      - image: daocloud.io/library/redis:3.2.9
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: redis-test
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-test
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: slow
+      selector:
+        matchLabels: {pv: "redis-test"}
+

@@ -1,0 +1,77 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: drone
+spec:
+  selector:
+    app: drone
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drone
+  labels:
+    k8s-app: drone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drone
+  template:
+    metadata:
+      labels:
+        app: drone
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: 192.168.0.118
+      containers:
+      - name: drone-server
+        image: drone/drone:0.8.4
+        env:
+        - name: DRONE_OPEN
+          value: "false"
+        - name: DRONE_ADMIN
+          value: bufan
+        - name: DRONE_HOST
+          value: https://drone.longban.site
+        - name: DRONE_GITLAB
+          value: "true"
+        - name: DRONE_GITLAB_CLIENT
+          value: bc394443bda6881d0d26e82379e39329d40a3901fbb83f22a28bfac73e44790a
+        - name: DRONE_GITLAB_SECRET
+          value: e885afa8e324361f02df0a14b140b17450fa5af142570d3edf334bcd8669945b
+        - name: DRONE_GITLAB_URL
+          value: https://gitlab.longban.site
+        - name: DRONE_SECRET
+          value: Xin1101
+        ports:
+        - name: web
+          containerPort: 8000
+        - name: agent
+          containerPort: 9000
+        volumeMounts:
+        - name: drone-data
+          mountPath: /var/lib/drone/
+      - name: drone-agent
+        image: drone/agent:0.8.4
+        command:
+        - "/bin/drone-agent"
+        - "agent"
+        env:
+        - name: DRONE_SERVER
+          value: localhost:9000
+        - name: DRONE_SECRET
+          value: Xin1101
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: drone-data
+        hostPath: {path: /data/docker/drone, type: Directory}
+      - name: docker-sock
+        hostPath: {path: /var/run/docker.sock, type: Socket}
+
